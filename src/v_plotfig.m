@@ -1,4 +1,4 @@
-function f_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
+function v_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
 
 %Plot fig - CMM script to plot out the various graphs from the data. 
 

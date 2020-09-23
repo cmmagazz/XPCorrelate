@@ -1,4 +1,4 @@
-function multiphaseplotter(datastack,resultsdir,ebsdname)
+function v_multiphaseplotter(datastack,resultsdir,ebsdname)
 %plots various things that are helpful if dealing with multiple phases and
 %looking at phase-property relationships. CHECK THE VALUES FOR PHASE
 %DISCRIMINATION 

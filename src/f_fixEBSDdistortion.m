@@ -92,40 +92,24 @@ saveas(gcf,fullfile(resultsdir, figname),'png')
 if strcmp(primphase,'default')==1
     primphase=char(ebsd.mineralList(2));
 end
-if EBSDREFq==0 || EBSDREFq==2
-    setMTEXpref('xAxisDirection','west');
-    ebsd=ebsd(primphase); %i dont think we need this actually
-    ebsd_ROI=ebsd;
-    %clean things up
-    [Grains,ebsd_ROI.grainId] = calcGrains(ebsd_ROI,'boundary','convexhull','angle',10*degree); %calc grains - this is useful for cleaning up
-    large_grains = Grains(Grains.grainSize >= 2); 
-    ebsd_clean = ebsd_ROI(large_grains);
-    [Grains,ebsd_clean.grainId] = calcGrains(ebsd_clean,'boundary','convexhull','angle',5*degree);
-    %fill EBSD
-    % delete nonindexed and fill them with nn existing phase 
-    ebsd_clean('n')=[] ;
-    ebsd_clean = fill(ebsd_clean) ;
-    ebsd=ebsd_clean;
-    
-elseif EBSDREFq==1
-    setMTEXpref('xAxisDirection','west');
-    ebsd_ROI=ebsd;
-    %clean things up
-    [Grains,ebsd_ROI.grainId] = calcGrains(ebsd_ROI,'boundary','convexhull','angle',10*degree); %calc grains - this is useful for cleaning up
-    large_grains = Grains(Grains.grainSize >= 5); 
-    ebsd_clean = ebsd_ROI(large_grains);
-    [Grains,ebsd_clean.grainId] = calcGrains(ebsd_clean,'boundary','convexhull','angle',5*degree);
-    %fill EBSD
-    % delete nonindexed and fill them with nn existing phase 
-    ebsd_clean('n')=[] ;
-    ebsd_clean = fill(ebsd_clean) ;
-    ebsd=ebsd_clean;
-end
-%% EBSD manipulation
+setMTEXpref('xAxisDirection','west');
 
+if EBSDREFq==0 || EBSDREFq==2
+    ebsd=ebsd(primphase); 
+end
+%clean things up
+[Grains,ebsd.grainId] = calcGrains(ebsd,'boundary','convexhull','angle',10*degree); %calc grains - this is useful for cleaning up
+large_grains = Grains(Grains.grainSize >= 3); 
+ebsd_clean = ebsd(large_grains);
+%fill EBSD
+% delete nonindexed and fill them with nn existing phase 
+ebsd_clean('n')=[] ;
+ebsd_clean = fill(ebsd_clean) ;
+ebsd=ebsd_clean;
+%% EBSD manipulation
 %We deal with EBSD data in the same way as hardness: based on 0,0 and going
 %up in the correct way.
-[ebsdGrid] = gridify(ebsd_clean);
+[ebsdGrid] = gridify(ebsd);
 % now set the x and y coordinates as what they are in the ebsd map
 % (cropped and cleaned)
 x_ebsd = ebsdGrid.prop.x;
@@ -143,16 +127,16 @@ if EBSDREFq==0 || EBSDREFq==2
     Phi  = ebsdGrid.orientations.Phi;
     phi2 = ebsdGrid.orientations.phi2;
 elseif EBSDREFq==1
-    allphi1s=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsd.mineralList)-1);
-    allPhis=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsd.mineralList)-1);
-    allphi2s=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsd.mineralList)-1);
+    allphi1s=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsdGrid.mineralList)-1);
+    allPhis=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsdGrid.mineralList)-1);
+    allphi2s=zeros(size(x_ebsd,1),size(y_ebsd,2),length(ebsdGrid.mineralList)-1);
 
-    for i = 1:length(ebsd.mineralList)-1 %go through all the phases and get their orientations
+    for i = 1:length(ebsdGrid.mineralList)-1 %go through all the phases and get their orientations
         try
             phasenebsd=gridify(ebsdGrid(ebsdGrid.mineralList(i+1)));
         catch
             i=i+1;
-            if i<=length(ebsd.mineralList)-1
+            if i<=length(ebsdGrid.mineralList)-1
                 phasenebsd=gridify(ebsdGrid(ebsdGrid.mineralList(i+1)));
             end
         end
@@ -160,9 +144,9 @@ elseif EBSDREFq==1
         allPhis(:,:,i)  = phasenebsd.orientations.Phi;
         allphi2s(:,:,i) = phasenebsd.orientations.phi2;
     end
-    phi1=mean(allphi1s,3,'omitnan'); delete allphi1s
-    Phi=mean(allPhis,3,'omitnan'); delete allPhis
-    phi2=mean(allphi2s,3,'omitnan'); delete allphi2s
+    phi1=mean(allphi1s,3,'omitnan'); delete allphi1s %get the phi of the relevant phase
+    Phi=mean(allPhis,3,'omitnan'); delete allPhis %don't worry about mean
+    phi2=mean(allphi2s,3,'omitnan'); delete allphi2s %if it's not that phase it's nan and this ignores nan
 end
 phase= ebsdGrid.phase;
 %check: are the x and y values changing in the same way as the
@@ -202,6 +186,9 @@ else
     y_ebsd= y_ebsd-min(min(y_ebsd));
 end
 
+%HOWEVER, each ebsd system will decide which was this is. I've tried to get
+%the right info for each microscope, but IF THIS ISN'T RIGHT JUST CLOSE THE
+%REF FIGURE AND IT WILL MANUALLY LET YOU PICK THE DIRECTION
 % put the first point on (0, 0)
 if strcmp(microscope,'merlin') 
     %if it's a merlin:
@@ -238,22 +225,26 @@ else
 end
 %
 %% select points on the manipulated ebsd
-ebsdfig=figure;
-if EBSDREFq==0 
-    hplot=contourf(x_ebsd,y_ebsd,Phi,45,'LineColor','None');
-elseif EBSDREFq==1
-    hplot=contourf(x_ebsd,y_ebsd,phase,45,'LineColor','None');
-elseif EBSDREFq==2
-    hplot=contourf(x_ebsd,y_ebsd,BCebsd,45,'LineColor','None');
-    caxis([nanmean(BCebsd(:))-nanstd(BCebsd(:)) nanmean(BCebsd(:))+nanstd(BCebsd(:))]) 
+% IF THIS IS THE WRONG WAY, just close the figure
+try
+    ebsdfig=figure;
+    if EBSDREFq==0 
+        hplot=contourf(x_ebsd,y_ebsd,Phi,45,'LineColor','None');
+    elseif EBSDREFq==1
+        hplot=contourf(x_ebsd,y_ebsd,phase,45,'LineColor','None');
+    elseif EBSDREFq==2
+        hplot=contourf(x_ebsd,y_ebsd,BCebsd,45,'LineColor','None');
+        caxis([nanmean(BCebsd(:))-nanstd(BCebsd(:)) nanmean(BCebsd(:))+nanstd(BCebsd(:))]) 
+    end
+    hold on
+    axis image
+    hold off
+    title('Reference Selection in EBSD (>4)')
+    [x_transREF,y_transREF] = getpts;
+    close(ebsdfig)
+catch
+    [x_ebsd,y_ebsd,phi1,Phi,phi2,phase,BCebsd,x_transREF,y_transREF]=f_ebsdwrongway(x_ebsd,y_ebsd,phi1,Phi,phi2,phase,BCebsd,EBSDREFq);
 end
-hold on
-axis image
-hold off
-title('Reference Selection in EBSD (>4)')
-[x_transREF,y_transREF] = getpts;
-close(ebsdfig)
-
 
 %plot it again with the points on for helpful guide, and save.
 figure
@@ -319,11 +310,11 @@ A = tform.T;
  BCebsdnew = BCebsdinterp(locebsdcorr(:,1), locebsdcorr(:,2));
  
 %Gridify into a matrix 
-phi1newG = gridify_vector(phi1new,size(X,1),size(Y,2))';
-PhinewG = gridify_vector(Phinew,size(X,1),size(Y,2))';
-phi2newG = gridify_vector(phi2new,size(X,1),size(Y,2))';
-phasenewG = gridify_vector(phasenew,size(X,1),size(Y,2))';
-BCebsdnewG = gridify_vector(BCebsdnew,size(X,1),size(Y,2))';
+phi1newG = f_gridify_vector(phi1new,size(X,1),size(Y,2))';
+PhinewG = f_gridify_vector(Phinew,size(X,1),size(Y,2))';
+phi2newG = f_gridify_vector(phi2new,size(X,1),size(Y,2))';
+phasenewG = f_gridify_vector(phasenew,size(X,1),size(Y,2))';
+BCebsdnewG = f_gridify_vector(BCebsdnew,size(X,1),size(Y,2))';
 
 %output into a class datastack with reasonable names
 datastack.X     = X;                 %X position

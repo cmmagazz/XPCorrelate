@@ -1,25 +1,23 @@
 %A collection of bits of code to play around with data once you've
 %corrected it. I.e. Post-Corrected Data Manipulator.
 %CMM 2019
-%looking at low oxygen (therefore bulk) relationships of phi vs H
 
-%first fix the phi to be between 0 and 90 FOR HCP?
-datastack.Phi(datastack.Phi>(pi/2))=pi-datastack.Phi(datastack.Phi>(pi/2));
-
-%% Remove points close to a grain boundary from phi vs H plot 
+%% GBD Filter 
+% Remove points close to a grain boundary from phi vs H plot to see the
+% effect of thsi
 wherehighGBD = datastack.GBD>7;
-H1=datastack.H.*wherehighGBD;
-H1(H1==0)=NaN;
-wherehighGBD = datastack.GBD<2;
-H2=datastack.H.*wherehighGBD;
-H2(H2==0)=NaN;
+Hhgbd=datastack.H.*wherehighGBD;
+Hhgbd(Hhgbd==0)=NaN;
+wherelowGBD = datastack.GBD<2;
+Hlgbd=datastack.H.*wherelowGBD;
+Hlgbd(Hlgbd==0)=NaN;
 
 %number of points
 sum(wherehighGBD(:))
 
 figphiVHlgbd=figure;
 figphiVHlgbd.Name='Phi vs H';
-scatter(datastack.Phirefl(:)*180/pi(),H1(:) ,'x')
+scatter(datastack.Phirefl(:)*180/pi(),Hhgbd(:) ,'x')
 xlabel('Declination angle  /^{o}')
 ylabel('Hardness /GPa')
 ylim([1 5])
@@ -27,26 +25,26 @@ xlim([0 90])
 title({'Declination angle against measured nanoindentation hardness,';' excluding points near grain boundaries'})
 figname=['LowGBD Phi V H Figure ' ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
-Hlgbd=H1;
-XPCcontourf(Hlgbd,'title',"Nanoindentation hardness - excluding points near GB",...
+
+XPCcontourf(Hhgbd,'title',"Nanoindentation hardness - excluding points near GB",...
     'cunits',"Hardness /GPa",'saveq',1)
 
 
 figphiVHlgbd=figure;
 figphiVHlgbd.Name='Phi vs H';
-scatter(datastack.Phirefl(:)*180/pi,H1(:))
+scatter(datastack.Phirefl(:)*180/pi,Hhgbd(:))
 hold on
-scatter(datastack.Phirefl(:)*180/pi,H2(:),'rx')
+scatter(datastack.Phirefl(:)*180/pi,Hlgbd(:),'rx')
 xlabel('Declination angle /^{o}')
 ylabel('Hardness /GPa')
-legend({'Points closer than 7um (inverse of fig11)','Points closer than 3um'})
+legend({'Points higher than 7um','Points closer than 2um'})
 ylim([1.5 5])
 title({'Declination angle against measured hardness';'displaying only points close to grain boundaries'})
 figname=['lowGBD Phi V H Figure ' ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
 saveas(gcf,fullfile(resultsdir, figname),'fig')
-XPCcontourf(H1)
-XPCcontourf(H2)
+XPCcontourf(Hhgbd)
+XPCcontourf(Hlgbd)
 
 %{
 whereLowGBD = GBD<7;
@@ -64,7 +62,7 @@ saveas(gcf,fullfile(resultsdir, figname),'png')
 %}
 figH=figure;
 figH.Name='HABG';
-contourf(X,Y,H1,45,'LineColor','None');
+contourf(X,Y,Hhgbd,45,'LineColor','None');
 title('Nanoindentation map excluding points near grain boundaries')
 xlabel('\mum')
 ylabel('\mum')
@@ -86,88 +84,8 @@ ylabel('Modulus /GPa')
 title('Phi vs M Figure Far From GB')
 figname=['lowGBD Phi V M Figure flip' ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
-%% Fit linear equation to Phi vs H -- see lsqfitting for nonlinear
-%{
 
-figphiVH=figure;
-figphiVH.Name='Phi vs H';
-scatter(FPhiGrtest(:)*180/pi,H(:))
-xlabel('Declination angle /^{o}')
-ylabel('Hardness /GPa')
-ylim([0.5 6])
-title('Declination angle against measured hardness')
-figname=['Phi V H Figure Flipped' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
-saveas(gcf,fullfile(resultsdir, figname),'fig')
-
-
-figphi=figure;
-figphi.Name='Phi';
-hplot=contourf(X,Y,FPhiGrtest*180/pi(),45,'LineColor','None');
-title('Corrected EBSD map')
-xlabel('\mum')
-ylabel('\mum')
-axis image
-caxis([0 90])
-c=colorbar;
-c.Label.String = 'Declination angle /^{o}';
-figname=['Phi Figure paper' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
-saveas(gcf,fullfile(resultsdir, figname),'fig')
-
-
-Hline=H(~isnan(H1));
-philine=FPhiGrtest(:)*180/pi;
-philine=philine(~isnan(H1));
-
-[hardfit,hardfitq] = polyfit(philine,Hline,1);
-% Display evaluated equation y = m*x + b
-disp(['Equation is y = ' num2str(hardfit(1)) '*x + ' num2str(hardfit(2))])
-hrsq=1 - hardfitq.normr^2 / norm(Hline-mean(Hline))^2;
-disp(['R squared is = ' num2str(hrsq)])
-% Evaluate fit equation using polyval
-[H_est,Hdelta] = polyval(hardfit,philine,hardfitq);
-% Add trend line to plot
-hold on
-plot(philine,H_est,'r','LineWidth',2)
-plot(philine,H_est+2*Hdelta,'m--',philine,H_est-2*Hdelta,'m')
-scatter(philine,Hline,'bx')
-xlabel('Declination angle /^{o}')
-ylabel('Hardness /GPa')
-ylim([1.5 5])
-%xlim([0 90])
-hold off
-title('Declination angle against measured hardness with fit')
-txt = (['H = ',num2str(hardfit(1),'%4.2f'), '* theta + ', num2str(hardfit(2),'%4.2f')]); %THIS SHIT IS WRONG
-text(55, 4.25, txt);%, 'FontSize', 10, 'Color', 'k');
-legend({'Linear Fit','90% confidence interval'},'Location','northeast')
-figname=['lowGBD Phi V H Figure FlippedFIT' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
-saveas(gcf,fullfile(resultsdir, figname),'fig')
-
-
-
-Mline=M(~isnan(M1));
-[modfit,modfitq] = polyfit(philine,Mline,1);
-% Display evaluated equation y = m*x + b
-disp(['Equation is y = ' num2str(modfit(1)) '*x + ' num2str(modfit(2))])
-mrsq=1 - modfitq.normr^2 / norm(Mline-mean(Mline))^2;
-disp(['R squared is = ' num2str(mrsq)])
-% Evaluate fit equation using polyval
-[M_est,mdelta] = polyval(modfit,philine,modfitq);
-% Add trend line to plot
-hold on
-plot(philine,M_est,'r--','LineWidth',2)
-plot(philine,M_est+2*mdelta,'m--',philine,M_est-2*mdelta,'m--')
-scatter(philine,Mline)
-xlabel('Phi /degrees')
-ylabel('Modulus /GPa')
-hold off
-title('Phi vs M Figure Far From GB with fit')
-figname=['lowGBD Phi V M Figure FlippedFIT' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
-%}
-%% Picking out individual grains, and looking at where the spread lies. 
+%% Picking out individual grains/angles, and looking at where the spread lies. 
 %this actually doesn't show much: it's too noisy.
 %{
 
@@ -213,8 +131,7 @@ Hg1c(Hg1c==0)=NaN;
 hplot=contourf(X,Y,Hg1a,45,'LineColor','None');
 %}
 
-%% Low oxygen thresholding, and fitting 
-%
+%% Low oxygen thresholding 
 
 whereLowOx = datastack.EPMAO<4;
 Hlox=Hmat.*whereLowOx;
@@ -244,13 +161,8 @@ c=colorbar;
 c.Label.String = 'Hardness /GPa';
 figname=['Hlowox' ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
-%}
-
-
-
 
 %% Binning the phi data (smearing within grains, spatially blind)
-
 %make an average for all 10deg bins:
 phiave=zeros(9,1);
 Hphiave=zeros(9,1);
@@ -259,8 +171,8 @@ countnum=zeros(9,1);
 for i = 1:9
     wherei = FPhiGrtest >(i-1)*10*pi/180 & FPhiGrtest <i*10*pi/180;
     phiave(i)=(i-0.5)*10;
-    Hphiave(i) = nanmean(H1(wherei));
-    stdevHphiave(i) =nanstd(H1(wherei));
+    Hphiave(i) = nanmean(Hhgbd(wherei));
+    stdevHphiave(i) =nanstd(Hhgbd(wherei));
     countnum(i)=nnz(wherei);
 end
 scatter(phiave(:),Hphiave(:))
@@ -274,9 +186,8 @@ figname=['Low Oxygen Phi V H Figure Binned' ebsdname(1:(max(size(ebsdname)-4)))]
 saveas(gcf,fullfile(resultsdir, figname),'png')
 hold off
 
-%% Pulling out invidual grains of interest
-
-%first lets get rid of bakelite
+%% Pulling out invidual areas of interest
+%Random bits of code to just pull out specific areas
 wheremat = datastack.Y > 642;
 wheremat = datastack.X > 170;
 
@@ -361,9 +272,9 @@ for i = 1:6
     saveas(gcf,fullfile(resultsdir, figname),'png')
     delete Hgi
 end
-%% phi vs GBZ binning
 
 
+%% Declination angle vs GB area binning
 
 figGBZVH=figure;
 figGBZVH.Name='gbz vs H';
@@ -402,75 +313,3 @@ figname=['Grain Size V H Figure Binned' ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
 saveas(gcf,fullfile(resultsdir, figname),'fig')
 hold off
-
-
-
-
-
-
-%lets try excluding points close to the boundary in big grains? 
-%{
-binno=10;
-gbszave=zeros(binno,1);
-Have=zeros(binno,1);
-stdevHave=zeros(binno,1);
-countnum=zeros(binno,1);
-alpha=10; %divvy things up not linearly - but exponent (more in small grains)
-beta=log((round(max(max(datastack.GBSZ)))+1)/alpha)/binno;
-for i = 1:binno
-    wherei = datastack.GBSZ > alpha*exp(beta*(i-1)) & datastack.GBSZ <=alpha*exp(beta*i);
-    gbszave(i)=alpha*exp(beta*(i-0.5));
-    wherehighGBD = datastack.GBD>sqrt(gbszave(i)/pi*4)*0.1*i/(binno); 
-    %also exclude things that are nearer than a certain distance to the GB.
-    %estimated distance is by using a circle, halving that radius, and 
-    %then loosening the constraint. 
-    Hi=datastack.H.*wherehighGBD;
-    Hi(Hi==0)=NaN;
-    Hii=Hi.*wherei;
-    Hii(Hii==0)=NaN;
-    Have(i) = nanmean(Hii(:));
-    stdevHave(i) =nanstd(Hii(:));
-    countnum(i)=nnz(wherei);
-    figure; 
-    contourf(X,Y,Hii,45,'LineColor','None');
-    axis image
-end
-scatter(gbszave(:),Have(:))
-hold on
-errorbar(gbszave(:),Have(:),stdevHave(:),'LineStyle','none');
-xlabel('Grain size /\mum^{2}')
-ylabel('Hardness /GPa')
-text(gbszave(:)+3,Have(:)+0.5,num2cell(countnum))
-title('Grain Size vs H Figure BinnedCROPPED')
-figname=['Grain Size V H Figure BinnedCROPPED' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
-hold off
-%}
-% this isn't so useful - it doesn't quite work i think because it's
-% over-sampling in the bulk due to mis-
-
-
-
-
-
-
-
-%% k means?
-
-hplot=contourf(X,Y,Hmat,45,'LineColor','None');
-
-load fisheriris
-Xiris = meas(:,3:4);
-
-figure;
-plot(Xiris(:,1),Xiris(:,2),'k*','MarkerSize',5);
-title 'Fisher''s Iris Data';
-xlabel 'Petal Lengths (cm)'; 
-ylabel 'Petal Widths (cm)';
-rng(1); % For reproducibility
-[idx,C] = kmeans(Xiris,3);
-
-%% line profiling
-
-aaatest=improfile(Hmat,[1,1],[1,90])
-

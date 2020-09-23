@@ -61,7 +61,7 @@ dataupperlower=[xdata2,upper,lower];
 %    0:90/100:90);
 data2=[data2x(:) data2y(:)];
 F=oxygenfitwORI(a,data2);
-F=gridify_vector(F',size(data2x,1),size(data2x,1));
+F=f_gridify_vector(F',size(data2x,1),size(data2x,1));
 F=F'; %flip because things
 
 %% reevaluate x and y data for plot

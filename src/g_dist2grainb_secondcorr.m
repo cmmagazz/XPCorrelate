@@ -1,4 +1,4 @@
-function [datastack,ebsdCorrectedLGG,Grains]=f_dist2grainb_secondcorr(resultsdir, ebsdname,datastack,currdate,ebsd)
+function [datastack,ebsdCorrectedLGG,Grains]=g_dist2grainb_secondcorr(resultsdir, ebsdname,datastack,currdate,ebsd)
 %script to calculate, at every point, the distance to the grain boundary.
 %inputs are just the directory and filename of the CORRECTED and 
 %appropriately sized ebsd map. import into mtex, and then distances 
@@ -87,24 +87,24 @@ end
 
 if size(GBD)==size(X) %check if dimensions agree, else interpolate using X,Y loc
 else
-    ebsdlocx = gridify_vector(ebsdCorrectedLGG.prop.x,size(GBD,1),size(GBD,2))';
-    ebsdlocy = gridify_vector(ebsdCorrectedLGG.prop.y,size(GBD,1),size(GBD,2))';
+    ebsdlocx = f_gridify_vector(ebsdCorrectedLGG.prop.x,size(GBD,1),size(GBD,2))';
+    ebsdlocy = f_gridify_vector(ebsdCorrectedLGG.prop.y,size(GBD,1),size(GBD,2))';
 
     GBDinterp = griddedInterpolant(ebsdlocx',ebsdlocy',GBD','nearest');
     GBDnew = GBDinterp(-X(:), -Y(:));
-    GBD = gridify_vector(GBDnew,size(X,1),size(Y,2))';
+    GBD = f_gridify_vector(GBDnew,size(X,1),size(Y,2))';
 
     GBSZinterp = griddedInterpolant(ebsdlocx',ebsdlocy',GBSZ','nearest');
     GBSZnew = GBSZinterp(-X(:), -Y(:));
-    GBSZ = gridify_vector(GBSZnew,size(X,1),size(Y,2))';
+    GBSZ = f_gridify_vector(GBSZnew,size(X,1),size(Y,2))';
 
     gIDinterp = griddedInterpolant(ebsdlocx',ebsdlocy',gID','nearest');
     gIDnew = gIDinterp(-X(:), -Y(:));
-    gID = gridify_vector(gIDnew,size(X,1),size(Y,2))';
+    gID = f_gridify_vector(gIDnew,size(X,1),size(Y,2))';
     
     gmointerp = griddedInterpolant(ebsdlocx',ebsdlocy',gmo','nearest');
     gmonew = gmointerp(-X(:), -Y(:));
-    gmo = gridify_vector(gmonew,size(X,1),size(Y,2))';
+    gmo = f_gridify_vector(gmonew,size(X,1),size(Y,2))';
 end
 
 

@@ -1,4 +1,4 @@
-function f_plotfigepma(datastack,resultsdir, ebsdname)
+function v_plotfigepma(datastack,resultsdir, ebsdname)
     resolution=['-r' num2str(600)];
 
     figFC=figure;

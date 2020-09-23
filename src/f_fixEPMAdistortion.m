@@ -95,16 +95,16 @@ A = tform.T;
 if size(C,3)==1 %if there's no BSE image
     Cinterp = griddedInterpolant(XC,YC,C,'linear');
     Onew = Cinterp(locepmacorr(:,1), locepmacorr(:,2));
-    OnewG = gridify_vector(Onew,size(X,1),size(Y,2))';%Gridify into a matrix 
+    OnewG = f_gridify_vector(Onew,size(X,1),size(Y,2))';%Gridify into a matrix 
     
 elseif size(C,3)==2 % if there is
     Cinterp = griddedInterpolant(XC,YC,C(:,:,1),'linear');
     Onew = Cinterp(locepmacorr(:,1), locepmacorr(:,2));
-    OnewG = gridify_vector(Onew,size(X,1),size(Y,2))';%Gridify into a matrix 
+    OnewG = f_gridify_vector(Onew,size(X,1),size(Y,2))';%Gridify into a matrix 
 
     BSEinterp = griddedInterpolant(XC,YC,C(:,:,2),'linear');
     BSEnew = BSEinterp(locepmacorr(:,1), locepmacorr(:,2));
-    BSEnewG = gridify_vector(BSEnew,size(X,1),size(Y,2))';%Gridify into a matrix 
+    BSEnewG = f_gridify_vector(BSEnew,size(X,1),size(Y,2))';%Gridify into a matrix 
 
     datastack.EPMAO     = OnewG;    %EPMA map O
     datastack.EPMABSE   = BSEnewG;  %BSE frmo the EPMA

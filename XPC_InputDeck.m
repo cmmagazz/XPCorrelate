@@ -5,9 +5,7 @@ clear all
 close all
 clc
 home
-%
-
-%adapted from MTEX - load mtex if need be
+%adapted from MTEX - load mtex
 try
   fid = fopen('VERSION','r');
   MTEXversion = fgetl(fid);
@@ -18,7 +16,7 @@ catch
     startup_mtex
 end
 
-addpath(genpath('bin'))
+addpath(genpath('src'))
 addpath(genpath('external'))
 
 %% 2 User Inputs
@@ -68,8 +66,6 @@ currdate=datestr(datetime);
 currdate=currdate(1:11);
 
 resultsdirold=resultsdir;
-%resultsdir=[resultsdirold,currdate];
-
 idxres = strfind(resultsdirold,'\');
 if idxres(end)==size(resultsdirold,2) %if there's a "\" at the end, dont take it
     idxres=idxres(end-2:end-1);
@@ -87,20 +83,12 @@ end
 %Cropping if need be:
 cropytop=0;
 cropybot=0;
-cropxright=0; %these might be wrong (left and right). might need a swap
+cropxright=0; 
 cropxleft=0;
-X=X(cropxright+1:end-cropxleft,cropytop+1:end-cropybot);
-Y=Y(cropxright+1:end-cropxleft,cropytop+1:end-cropybot);
-fullres=fullres(cropxright+1:end-cropxleft,cropytop+1:end-cropybot,:);
+X=X(cropxleft+1:end-cropxright,cropytop+1:end-cropybot);
+Y=Y(cropxleft+1:end-cropxright,cropytop+1:end-cropybot);
+fullres=fullres(cropxleft+1:end-cropxright,cropytop+1:end-cropybot,:);
 
-
-%{ 
-%rotating Hardness 90degrees if need be: THIS DOESN'T REALLY WORK
-
-X=X;
-Y=Y;
-permute(fullres,[2 1 3]);
-%}
 
 %% 4 Running the EBSD registration
 
@@ -137,30 +125,29 @@ if hexmat==1
     datastack.Phirefl(datastack.Phirefl>(pi/2))=pi-datastack.Phirefl(datastack.Phirefl>(pi/2));
 end
 %% 5 Saving figures
-f_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
+v_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
 
 
 if EBSDREFq==1
-    multiphaseplotter(datastack,resultsdir,ebsdname)
+    v_multiphaseplotter(datastack,resultsdir,ebsdname)
 end
 
 
 %% 6 EPMA input
 if epmaq==1
-    cropq=0; %DO WE NEED TO CROP THE DATA?
+    cropq=0; %DO WE NEED TO CROP THE DATA? 1=yes 0=no
     %import the epma data (currently an image)
-    [C, XC, YC] = f_loadEPMA(epmaname, filepath, epmabsename);    
+    [C, XC, YC] = f_loadEPMA(epmaname, filepath, epmabsename);
     
     %alignment
     [datastack]=f_fixEPMAdistortion(datastack,C,XC,YC,cropq, EPMArefq);
-
+    
     %some smoothing
-     datastack.EPMAOS = smoothdata(datastack.EPMAO,2,'gaussian',5.5);
-     datastack.EPMAOS = smoothdata(datastack.EPMAOS,1,'gaussian',5.5);
-     %datastack.EPMAObackup = datastack.EPMAO;
-     datastack.EPMAO = datastack.EPMAOS;
-     
-    f_plotfigepma(datastack,resultsdir, ebsdname)
+    datastack.EPMAOS = smoothdata(datastack.EPMAO,2,'gaussian',5.5);
+    datastack.EPMAOS = smoothdata(datastack.EPMAOS,1,'gaussian',5.5);
+    datastack.EPMAO = datastack.EPMAOS;
+    
+    v_plotfigepma(datastack,resultsdir, ebsdname)
 end
 %% 7 save as ebsd
 if saveasebsdq==1
@@ -171,8 +158,6 @@ end
 if gdcalcq==1
     datastack=f_dist2grainb(resultsdir, ebsdname,datastack,currdate,ebsd);
 end
-
-
 
 %% 9 Save things
 close all

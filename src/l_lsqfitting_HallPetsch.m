@@ -1,12 +1,10 @@
-%%Function to run some least squares fitting to data on hall petch
-%%values (H1)
+%% Function to run some least squares fitting to data on hall petch
 %CMM 2019
+%REQUIRES the binning in p_PCDM 
 
-
-%% For size vs H
 a0 = [max(Have(:)) -1 Have(end)];
 
-xdata=sqrt(gbszave(:)/pi*4);
+xdata=sqrt(gbszave(:)/pi*4); %model the size as an effective radius
 %turn into column of data and remove nan
 
 [a, resnorm,residual,~,~,~,J] = lsqcurvefit(@myfun,a0,xdata,Have); %least square

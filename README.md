@@ -51,6 +51,13 @@ This starts with several sections:
 
 #
 Other scripts
+Naming convention: 
+    - f_: function. Primarily related to the main XPC_InputDeck, usually run as is. 
+    - g_: Second correction. Comes after f. 
+    - l_: Least square function, to be edited and used post-manipulation.
+    - p_: post-correction data manipulators. 
+    - v_: visualisation. 
+    - z_: Scrap, but handy. 
 
 From here on, scripts are run ad-hoc as needed. In order as needed to recreate the results in CM Magazzeni et al 2020:
 

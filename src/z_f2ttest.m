@@ -1,5 +1,5 @@
 %% 2 sample t-test 
-%a simple script to get some stats if need be
+%a scrap script to get some stats if need be
 
 figH=figure;
 figH.Name='Modulus';

@@ -4,7 +4,6 @@ function [datastack]=f_dist2grainb(resultsdir, ebsdname,datastack,currdate,ebsd)
 %appropriately sized ebsd map. import into mtex, and then distances 
 %are calculated thereafter. 
 
-%CS=loadCIF('Ti-Titanium-alpha');
 try
     CS=f_phaseTranslate(ebsd);
 catch
@@ -20,12 +19,6 @@ setMTEXpref('xAxisDirection','east');%FLIPPING HERE - FIX THIS IT@S NONSENSE
 %clean things up
 ebsdCorrected('n')=[] ;
 [Grains,ebsdCorrected.grainId] = calcGrains(ebsdCorrected,'boundary','convexhull','angle',5*degree); %calc grains - this is useful for cleaning up
-%{
-%large_grains = Grains(Grains.grainSize >= 20); 
-%ebsdCorrectedLG = ebsdCorrected(large_grains);
-%[Grains,ebsdCorrectedLG.grainId] = calcGrains(ebsdCorrectedLG,'boundary','convexhull','angle',5*degree);
-%
-%}
 ebsdCorrected = fill(ebsdCorrected) ;
 ebsdCorrected = smooth(ebsdCorrected('indexed'),'fill',Grains);
 ebsdCorrectedLGG=gridify(ebsdCorrected); 
@@ -69,20 +62,20 @@ end
     
 if size(GBD)==size(X) %check if dimensions agree, else interpolate using X,Y loc
 else
-    ebsdlocx = gridify_vector(ebsdCorrectedLGG.prop.x,size(GBD,1),size(GBD,2))';
-    ebsdlocy = gridify_vector(ebsdCorrectedLGG.prop.y,size(GBD,1),size(GBD,2))';
+    ebsdlocx = f_gridify_vector(ebsdCorrectedLGG.prop.x,size(GBD,1),size(GBD,2))';
+    ebsdlocy = f_gridify_vector(ebsdCorrectedLGG.prop.y,size(GBD,1),size(GBD,2))';
 
     GBDinterp = griddedInterpolant(ebsdlocx',ebsdlocy',GBD','nearest');
     GBDnew = GBDinterp(-X(:), -Y(:));
-    GBD = gridify_vector(GBDnew,size(X,1),size(Y,2))';
+    GBD = f_gridify_vector(GBDnew,size(X,1),size(Y,2))';
 
     GBSZinterp = griddedInterpolant(ebsdlocx',ebsdlocy',GBSZ','nearest');
     GBSZnew = GBSZinterp(-X(:), -Y(:));
-    GBSZ = gridify_vector(GBSZnew,size(X,1),size(Y,2))';
+    GBSZ = f_gridify_vector(GBSZnew,size(X,1),size(Y,2))';
 
     gIDinterp = griddedInterpolant(ebsdlocx',ebsdlocy',gID','nearest');
     gIDnew = gIDinterp(-X(:), -Y(:));
-    gID = gridify_vector(gIDnew,size(X,1),size(Y,2))';
+    gID = f_gridify_vector(gIDnew,size(X,1),size(Y,2))';
 end
 
 

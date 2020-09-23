@@ -4,7 +4,7 @@
 
 % Writes back clean data
 
-function f_writeEBSDdata_seccorr(filename,datastack)
+function g_writeEBSDdata_seccorr(filename,datastack)
 
 
 data=zeros(size(datastack.X,1)*size(datastack.Y,2),6);
