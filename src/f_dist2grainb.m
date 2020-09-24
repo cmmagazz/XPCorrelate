@@ -54,7 +54,7 @@ end
 
 X=datastack.X;
 Y=datastack.Y;
-if size(GBD,2)==size(X,1) && size(GBD,1)==size(X,2)
+if size(GBD,2)==size(X,1) || size(GBD,1)==size(X,2)
     GBD=GBD';
     GBSZ=GBSZ';
     gID=gID';

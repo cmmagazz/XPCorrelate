@@ -214,7 +214,7 @@ elseif strcmp(microscope,'tescan')
 elseif strcmp(microscope,'xbeam') 
     %if it's the crossbeam instruments
     %the xbeam is frustrating
-    [x_ebsd,y_ebsd,phi1, phi2, Phi, phase,BCebsd]=fixXbeam(x_ebsd,y_ebsd,phi1, phi2, Phi, phase,BCebsd);
+    [x_ebsd,y_ebsd,phi1, phi2, Phi, phase,BCebsd]=f_fixXbeam(x_ebsd,y_ebsd,phi1, phi2, Phi, phase,BCebsd);
 end
 
 %quick check:

@@ -117,20 +117,20 @@ datastack.BCebsdseccorr=BCebsdseccorr;
 
 datastack.Phireflseccorr=datastack.Phiseccorr;
 datastack.Phireflseccorr(datastack.Phireflseccorr>(pi/2))=pi-datastack.Phireflseccorr(datastack.Phireflseccorr>(pi/2));
-
+ 
 g_writeEBSDdata_seccorr(fullfile(resultsdir, [ebsdname(1:(max(size(ebsdname)-4))) 'secondcorrected' currdate]),datastack)
-[datastack,ebsdCorrectedLGG,Grains]=g_dist2grainb_secondcorr(resultsdir, ebsdname,datastack,currdate,ebsd);
-
+ 
 %% plotting
-
-XPCcontourf(datastack.Phiseccorr,'title',"Second Corrected Phi",...
-    'cunits',"Declination angle /^{o}",'saveq',1)
-
-
-XPCcontourf(datastack.Phireflseccorr*180/pi()-datastack.Phipred, 'title',...
-    "Second correction Phi - Predicted Phi",'cunits', "Declination angle /^{o}", ...
-    'saveq',1)
-
+ 
+XPCcontourf(datastack.Phiseccorr.*180/pi,'title',"Second Corrected Phi",...
+    'cunits',"Declination angle /^{o}", 'saveq',1)
+ 
+XPCcontourf(datastack.Phireflseccorr*180/pi()-datastack.Phipred,...
+    'title',"Second Corrected Phi - Predicted Phi", 'cunits',"Declination angle /^{o}", 'saveq',1)
+ 
+XPCcontourf(datastack.Phireflseccorr*180/pi()-datastack.Phirefl*180/pi(),...
+    'title',"Second Corrected Phi - First Corrected Phi", 'cunits',"Declination angle /^{o}", 'saveq',1)
+ 
 figure;
 scatter(datastack.Phireflseccorr(:)*180/pi(),datastack.H(:),'x')
 xlabel('Declination angle /^{o}')
@@ -140,6 +140,13 @@ xlim([0 90])
 title('Declination angle against measured hardness')
 figname=['SECCORR phi vs H_useedge' num2str(useedgeq) ebsdname(1:(max(size(ebsdname)-4)))];
 saveas(gcf,fullfile(resultsdir, figname),'png')
+ 
+ 
+%% Grain boundary analysis
+disp('Running grain boundary analysis on second correction')
+ 
+[datastack,ebsdCorrectedLGG,Grains]=g_dist2grainb_secondcorr(resultsdir, ebsdname,datastack,currdate,ebsd);
+ 
 
 
 function F = myfun(a,data)
