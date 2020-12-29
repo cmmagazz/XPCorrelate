@@ -45,6 +45,12 @@ try
 catch
     defsaveasfigq = 0;
 end
+
+try evalin('base','resolution'); %try and pick resolution
+catch
+    resolution=['-r' num2str(600)];
+end
+
 p = inputParser;
 
 validArrayPosNum = @(x) isnumeric(x);
@@ -80,7 +86,7 @@ if strlength(p.Results.cunits)>1 %only put c units if it's been inputted
 end
 
 if p.Results.saveq==1
-    print(fullfile(p.Results.resultsdir, p.Results.figname),'-dpng','-r600')
+    print(fullfile(p.Results.resultsdir, p.Results.figname),'-dpng',resolution)
     if p.Results.saveasfigq==1
         saveas(gcf,fullfile(p.Results.resultsdir, p.Results.figname),'fig')
     end
