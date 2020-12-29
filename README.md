@@ -1,11 +1,13 @@
- XPCorrelate
-#
+ 
+# XPCorrelate
 Code to register and analyse multidimensional maps e.g. nanoindentation maps vs EBSD, etc.
 The default setup is to analyse Nanoindentation mapping against EBSD data, and if desired, EPMA data.
 Data formats are expected as:
-    - Nanoindentation: .mat file following the format given in XPImport. See below. 
-    - EBSD: ctf or h5 file. 
-    - EPMA: currently using a .tiff image for this due to unit difficulties.
+
+    Nanoindentation: .mat file following the format given in XPImport. See below. 
+    EBSD: ctf or h5 file. 
+    EPMA: currently using a .tiff image for this due to unit difficulties.
+    
 
 Requirements, external: 
 - Matlab
@@ -16,8 +18,7 @@ Requirements, external:
 Requirements, internal: 
 - XPImport @ https://github.com/cmmagazz/XPressImport if you haven't already prepped the nanoindentation data
 
-#
-How to use XPCorrelate
+## How to use XPCorrelate
 Most of the process flow is described in XPC_InputDeck.m 
 This starts with several sections: 
 1) Clearing workspace and loading relevant packages (MTEX and ECC etc)
@@ -27,19 +28,23 @@ This starts with several sections:
    This creates the variable *datastack*, a struct where each variable should be an array of size no of x indents * no of y indents. 
    The convention used is that data should be structured in grids which start at 0,0, and X(2,1) is larger than X(1,1), and Y(1,2) is larger than Y(1,1).
    Datastack structure: 
- datastack.X               %X position
- datastack.Y               %Y position
- datastack.S               %Surface displacement
- datastack.D               %Depth
- datastack.L               %Load
- datastack.M               %Modulus
- datastack.St              %Stiffness^2/Load
- datastack.H               %Hardness
- datastack.phi1            %phi1  (ebsd)
- datastack.Phi             %Phi   (ebsd)
- datastack.phi2            %phi2  (ebsd)
- datastack.phase           %phase (ebsd)
- datastack.BCebsd          %Band Contrast (ebsd)
+   
+``` 
+datastack.X               %X position
+datastack.Y               %Y position
+datastack.S               %Surface displacement
+datastack.D               %Depth
+datastack.L               %Load
+datastack.M               %Modulus
+datastack.St              %Stiffness^2/Load
+datastack.H               %Hardness
+datastack.phi1            %phi1  (ebsd)
+datastack.Phi             %Phi   (ebsd)
+datastack.phi2            %phi2  (ebsd)
+datastack.phase           %phase (ebsd)
+datastack.BCebsd          %Band Contrast (ebsd)
+```
+ 
 5) Save figures
 6) Run step 4 and 5 for EPMA data. 
 7) Save the registered ebsd data
@@ -49,8 +54,7 @@ This starts with several sections:
  datastack.gID             %ID of grain in which point resides
 9) Save all variables to .mat file. 
 
-#
-Other scripts
+## Other scripts
 Naming convention: 
 - f_: function. Primarily related to the main XPC_InputDeck, usually run as is. 
 - g_: Second correction. Comes after f. 
