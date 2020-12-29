@@ -1,18 +1,23 @@
 %Input deck for multi-dimensional spatially resolved analysis of EBSD,
 %Express, and other maps. CMM 2019. 
-%% 1
+%% 1 Sorting dependencies
 clear all
 close all
 clc
 home
 %adapted from MTEX - load mtex
+%add the mtex path - this will need to be changed for the pc you run on!
 try
   fid = fopen('VERSION','r');
   MTEXversion = fgetl(fid);
   fclose(fid);
   fprintf([' ' MTEXversion '  ']);
 catch
-    addpath Z:\CM\mtex-5.0.3
+    try 
+        addpath Z:\CM\mtex-5.0.3
+    catch
+        addpath(genpath('C:\Users\Magazzeni\Documents\mtex-5.0.3'))
+    end
     startup_mtex
 end
 
@@ -20,16 +25,18 @@ addpath(genpath('src'))
 addpath(genpath('external'))
 
 %% 2 User Inputs
+%This script runs entirely within the location of the results - it does not
+%save any file in the scripts location. 
 
 filepath    = 'Z:\CM\18_OctEXPRESS\200727_CpTiGB\';  %Location of files
 expressname = 'expresscptigb_5x5_+-82umspacing_40x40_2umspacing_3mNLC_Express_results.mat';
 ebsdname    = 'preexpressmap.ctf'; %name of the ebsd with extension
 
-epmaq       =  0; %epma analysis?
+epmaq       =  0; %epma analysis? 1=yes, 0=no
 epmaname    = 'Map 1_ds1_O  Ka_O  Ka (Sp 1)_item2.tiff'; %name of epma file if needed 
 epmabsename = 'Map 1_ds1Vs1 BSE Z_BSE Z_item1'; %name of epma BSE file if needed 
 
-gdcalcq     = 1; %grain boundary analysis?
+gdcalcq     = 1; %grain boundary analysis? 1=yes, 0=no
 microscope  ='merlin2';%what microscope was the ebsd map taken on? 'evo', 'merlin', 'xbeam', or 'tescan'
 primphase   ='Titanium';%what's the primary phase in the ebsd map? default uses 1st material phase
 %ebsd analysis questions
@@ -42,18 +49,22 @@ EPMArefq    = 1;%0 uses the chemical map for referencing
 hexmat      = 1; %if it's hexagonal, make reflect Phi values above 90 about 90deg
 saveasebsdq = 1; %activate the writedata to a file that can be read by mtex
 saveasfigq  = 0; %save images as .fig as well as .png?
+resolution  = ['-r' num2str(600)]; %resolution for .pngs
 %% 3 Loading and some manipulation
-%network drive determination
-NDD=filepath(1);
+
 idx = strfind(ebsdname,'.'); %get the extension and load ebsd
-if strcmp(ebsdname(idx+1:end),'h5')
+if strcmp(ebsdname(idx+1:end),'h5') %if it is an h5 file
     ebsd=loadEBSD_h5(fullfile(filepath,ebsdname));
-else
+elseif strcmp(ebsdname(idx+1:end),'ctf') %if it is a ctf file
     ebsd=loadEBSD(fullfile(filepath,ebsdname),ebsdname(idx+1:end));
 end
-filepathnew=filepath;
-load(fullfile(filepath,expressname));%load the express data
+
+filepathnew=filepath;%the nanoindentation data also has a filepath variable, so set this to update it
+load(fullfile(filepath,expressname));%load the nanoindentation data
+
 filepath=filepathnew; %keep the user inputted filepath
+%network drive determination
+NDD=filepath(1);
 %make sure the drive name is the same:
 if strcmp(NDD,resultsdir(1)) && strcmp(NDD,filepath(1)) %take the resultsdir from the express input code
     %do nothing
@@ -62,7 +73,7 @@ else
     filepath=[NDD filepath(2:end)];
 end
 
-currdate=datestr(datetime);
+currdate=datestr(datetime); %use the date to distinguish between analysis runs
 currdate=currdate(1:11);
 
 resultsdirold=resultsdir;
@@ -80,7 +91,7 @@ if ~exist(resultsdir, 'dir')
    mkdir(resultsdir)
 end
 
-%Cropping if need be:
+%Cropping of nanoindentation data if need be:
 cropytop=0;
 cropybot=0;
 cropxright=0; 
@@ -120,9 +131,11 @@ X=datastack.X;
 Y=datastack.Y;
 
 if hexmat==1
-    %first fix the phi to be between 0 and 90 FOR HCP?
+    %first fix the phi to be between 0 and 90 FOR HCP
     datastack.Phirefl=datastack.Phi;
     datastack.Phirefl(datastack.Phirefl>(pi/2))=pi-datastack.Phirefl(datastack.Phirefl>(pi/2));
+else
+    datastack.Phirefl=datastack.Phi; %if it isn't hexmat, still make a variable for the plotters
 end
 %% 5 Saving figures
 v_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
@@ -151,16 +164,18 @@ if epmaq==1
 end
 %% 7 save as ebsd
 if saveasebsdq==1
+    disp('Saving registered EBSD file')
     f_writeEBSDdata(fullfile(resultsdir, [ebsdname(1:(max(size(ebsdname)-4))) 'corrected' currdate]),datastack)
 end 
 
 %% 8 grain distance analysis
 if gdcalcq==1
+    disp('Running grain boundary distance analysis')
     datastack=f_dist2grainb(resultsdir, ebsdname,datastack,currdate,ebsd);
 end
 
 %% 9 Save things
 close all
 save([fullfile(resultsdir,[filename(1:length(filename)-4) '_XPCorrelate_results' currdate]) '.mat']);
-
+disp('Analysis complete')
  

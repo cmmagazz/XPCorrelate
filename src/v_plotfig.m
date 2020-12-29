@@ -1,8 +1,10 @@
 function v_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
 
 %Plot fig - CMM script to plot out the various graphs from the data. 
-
-resolution=['-r' num2str(600)];
+try evalin('base','resolution');
+catch
+    resolution=['-r' num2str(600)];
+end
 
 meanH=nanmean(datastack.H(:));
 stdH=nanstd(datastack.H(:));
@@ -48,7 +50,7 @@ caxis([meanM-4*stdM meanM+4*stdM])
 c=colorbar;
 c.Label.String = 'Modulus (GPa)';
 figname=['Modulus Figure ' filename(1:(max(size(filename)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
+print(fullfile(resultsdir, figname),'-dpng',resolution)
 if saveasfigq==1 saveas(gcf,fullfile(resultsdir, figname),'fig') end
 %}
 
@@ -79,7 +81,7 @@ axis image
 c=colorbar;
 c.Label.String = 'BC /arb units';
 figname=['BC Figure paper' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
+print(fullfile(resultsdir, figname),'-dpng',resolution)
 if saveasfigq==1 
     saveas(gcf,fullfile(resultsdir, figname),'fig') 
 end
@@ -106,7 +108,7 @@ scatter(datastack.Phi(:)*180/pi,M(:))
 xlabel('Phi /degrees')
 ylabel('Modulus /GPa')
 figname=['Phi vs M Figure ' ebsdname(1:(max(size(ebsdname)-4)))];
-saveas(gcf,fullfile(resultsdir, figname),'png')
+print(fullfile(resultsdir, figname),'-dpng',resolution)
 if saveasfigq==1 saveas(gcf,fullfile(resultsdir, figname),'fig') end
 %}
 

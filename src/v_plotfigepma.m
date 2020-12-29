@@ -1,6 +1,9 @@
 function v_plotfigepma(datastack,resultsdir, ebsdname)
-    resolution=['-r' num2str(600)];
-
+    try evalin('base','resolution');
+    catch
+        resolution=['-r' num2str(600)];
+    end
+    
     figFC=figure;
     figFC.Name='FC';
     hplot=contourf(datastack.X,datastack.Y,datastack.EPMAO,45,'LineColor','None');

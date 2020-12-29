@@ -48,13 +48,16 @@ function [ CS] = f_phaseTranslate(ebsd)
     'Cementit (New)','Cementit (New)'}; % PK 20200220
     
  
-    phasenamenumber = strcmp([phasenames(:,1)], ebsd.CSList{phasen, 1}.mineral); % find the row with the right name
+    try
+        phasenamenumber = strcmp([phasenames(:,1)], ebsd.CSList{phasen, 1}.mineral); % find the row with the right name
+    catch
+        phasenamenumber = strcmp([phasenames(:,1)], ebsd.CSList{1, phasen}.mineral); % find the row with the right name
+    end
     primphaseMTEX{phasen}=char(phasenames(phasenamenumber,2)); %use the other column to translate
 
-    CS=loadCIF([pwd '\bin\cifs\' primphaseMTEX{phasen}]); %temporarily call  a cs FROM LOCAL CIF FOLDER
+    cs=loadCIF([pwd '\src\cifs\' primphaseMTEX{phasen}]); %temporarily call  a cs FROM LOCAL CIF FOLDER
     
-    %{
-    PhaseData(phasen).Name=char(phasenames(phasenamenumber,2));%Also translate PhaseData names for consistency
+    %
     
     if sum(phasenamenumber)>1 %Check if the names are indistinguishable - this will break lBurgLine in particular.
         error('The phase names are the same - please fix this in the Bruker file')
@@ -62,12 +65,13 @@ function [ CS] = f_phaseTranslate(ebsd)
     
 
     
-    if phasen == 1
+    if phasen == startno
         cs_all=cs;
     else
         cs_all={cs_all,cs}; %put it all into a variable
     end
 end
+    
     
 %}
 

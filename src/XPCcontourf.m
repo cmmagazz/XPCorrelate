@@ -26,13 +26,18 @@ function XPCcontourf(arraytoplot,varargin)
 %   units, while assuming the rest as default.
 % CMM 2020
 
-defaultx=evalin('base','datastack.X');
-defaulty=evalin('base','datastack.Y');
+
+try
+    defaultx=evalin('base','datastack.X');
+    defaulty=evalin('base','datastack.Y');
+end
 defaultfigtitle=string(inputname(1));
 deflimits = [nanmean(arraytoplot(:))-2*nanstd(arraytoplot(:)) ...
     nanmean(arraytoplot(:))+2*nanstd(arraytoplot(:))];
 defunits='\mum';
 defcunits='';
+
+defaultfigname=string(inputname(1));
 defresultsdir = evalin('base','resultsdir');
 defsaveq=0;
 try
@@ -54,6 +59,7 @@ addOptional(p,'units',defunits,@isstring);
 addOptional(p,'cunits',defcunits,@isstring);
 
 addParameter(p,'saveq',defsaveq,@isscalar);
+addOptional(p,'figname',defaultfigname,@isstring);
 addOptional(p,'resultsdir',defresultsdir,@isstring);
 addParameter(p,'saveasfigq',defsaveasfigq,@isscalar);
 
@@ -74,12 +80,10 @@ if strlength(p.Results.cunits)>1 %only put c units if it's been inputted
 end
 
 if p.Results.saveq==1
-    print(fullfile(p.Results.resultsdir, inputname(1)),'-dpng','-r600')
+    print(fullfile(p.Results.resultsdir, p.Results.figname),'-dpng','-r600')
     if p.Results.saveasfigq==1
-        saveas(gcf,fullfile(p.Results.resultsdir, inputname(1)),'fig')
+        saveas(gcf,fullfile(p.Results.resultsdir, p.Results.figname),'fig')
     end
 end
-
-
 
 end
