@@ -16,7 +16,14 @@ Requirements, external:
 - For CTF saving in the second correction, credit to Dr. Azdiar A. Gazder and Dr. Frank Niessen for https://github.com/frankNiessen/exportCTF
 
 Requirements, internal: 
-- XPImport @ https://github.com/cmmagazz/XPressImport if you haven't already prepped the nanoindentation data
+- XPImport @ https://github.com/cmmagazz/XPressImport in order to prepare the nanoindentation data
+
+## What does XPCorrelate do?
+XPCorrelate uses, as a first pass, a set of user-defined points across the property maps in order to align and interpolate the 2d datasets. Simply point, by clicking on some points you can see in both images, the scripts can set them on top of one another. The first transformation is calculated and applied to the EBSD dataset, followed by the EPMA dataset. Immediately, you can correlate each pixel against the two datasets and get structure-property scatter plots. 
+
+Following this, you can manipulate the 2d datasets which will affect your structure-property maps. In the example given in the paper, removing the datapoints near grain boundaries can significantly "clean" the declination angle vs hardness scatter plot. This is all done in the PCDM scripts bit by bit, where you can change for your dataset and requirements. 
+
+For further improvement, you can feed the "quite well" aligned maps into a second correction script (g_ scripts, nomenclature is described below), where edges are used to better align these two datasets. The description of how this works is very well described in the ECC script (from @harshagurnani), but in summary: cross-correlation can be used to determine how well the edges sit on top of one another, you can find a transformation that fits this as well as possible. 
 
 ## How to use XPCorrelate
 Most of the process flow is described in XPC_InputDeck.m 
