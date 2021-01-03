@@ -6,8 +6,12 @@ Data formats are expected as:
 
     Nanoindentation: .mat file following the format given in XPImport. See below. 
     EBSD: ctf or h5 file. 
-    EPMA: currently using a .tiff image for this due to unit difficulties.
+    EPMA: tiff file.
     
+This reproduces the method presented in "Nanoindentation in multi-modal map combinations: A Correlative Approach to Local Mechanical Property Assessment" by CM Magazzeni *et al.* 2020 ([arXiv](https://arxiv.org/abs/2008.12267/) / [publication](https://doi.org/10.1557/s43578-020-00035-y/)).
+
+The code is provided for research proposes only. If you use this software, 
+please cite the above paper.
 
 Requirements, external: 
 - Matlab
