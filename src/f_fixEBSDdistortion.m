@@ -191,12 +191,7 @@ end
 %REF FIGURE AND IT WILL MANUALLY LET YOU PICK THE DIRECTION
 % put the first point on (0, 0)
 if strcmp(microscope,'merlin') 
-    %if it's a merlin:
-    phi1=flipud(fliplr(phi1));
-    Phi=flipud(fliplr(Phi));
-    phi2=flipud(fliplr(phi2));
-    phase=flipud(fliplr(phase));
-    BCebsd=flipud(fliplr(BCebsd));
+    %now deprecated by using mtex conversion
 elseif strcmp(microscope,'evo') 
     %if it's a evo:
     phi1=fliplr(phi1);

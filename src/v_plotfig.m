@@ -1,7 +1,8 @@
 function v_plotfig(datastack,resultsdir,ebsdname,saveasfigq)
 
 %Plot fig - CMM script to plot out the various graphs from the data. 
-try evalin('base','resolution');
+try 
+    resolution=evalin('base','resolution');
 catch
     resolution=['-r' num2str(600)];
 end

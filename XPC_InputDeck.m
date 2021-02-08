@@ -28,17 +28,17 @@ addpath(genpath('external'))
 %This script runs entirely within the location of the results - it does not
 %save any file in the scripts location. 
 
-filepath    = 'Z:\CM\18_OctEXPRESS\200727_CpTiGB\';  %Location of files
-expressname = 'expresscptigb_5x5_+-82umspacing_40x40_2umspacing_3mNLC_Express_results.mat';
-ebsdname    = 'preexpressmap.ctf'; %name of the ebsd with extension
+filepath    = 'C:\Users\Magazzeni\Documents\GitHub\XPCorrelate\publicationdata\';  %Location of files
+expressname = '3expressCPti_3x3_+-92um_46x46_2um_3mNLC_Express_results.mat';
+ebsdname    = 'cpti_express.ctf'; %name of the ebsd with extension
 
 epmaq       =  0; %epma analysis? 1=yes, 0=no
 epmaname    = 'Map 1_ds1_O  Ka_O  Ka (Sp 1)_item2.tiff'; %name of epma file if needed 
 epmabsename = 'Map 1_ds1Vs1 BSE Z_BSE Z_item1'; %name of epma BSE file if needed 
 
 gdcalcq     = 1; %grain boundary analysis? 1=yes, 0=no
-microscope  ='merlin2';%what microscope was the ebsd map taken on? 'evo', 'merlin', 'xbeam', or 'tescan'
-primphase   ='Titanium';%what's the primary phase in the ebsd map? default uses 1st material phase
+microscope  ='merlin';%what microscope was the ebsd map taken on? 'evo', 'merlin', 'xbeam', or 'tescan'
+primphase   ='default';%what's the primary phase in the ebsd map? default uses 1st material phase
 %ebsd analysis questions
 EBSDREFq    = 0;%0 if just one phase: uses IPF for EBSD reference selection
                 %1 if multiphase: uses phase map
@@ -56,7 +56,7 @@ idx = strfind(ebsdname,'.'); %get the extension and load ebsd
 if strcmp(ebsdname(idx+1:end),'h5') %if it is an h5 file
     ebsd=loadEBSD_h5(fullfile(filepath,ebsdname));
 elseif strcmp(ebsdname(idx+1:end),'ctf') %if it is a ctf file
-    ebsd=loadEBSD(fullfile(filepath,ebsdname),ebsdname(idx+1:end));
+    ebsd=loadEBSD(fullfile(filepath,ebsdname),ebsdname(idx+1:end),'convertSpatial2EulerReferenceFrame');
 end
 
 filepathnew=filepath;%the nanoindentation data also has a filepath variable, so set this to update it
@@ -92,7 +92,7 @@ if ~exist(resultsdir, 'dir')
 end
 
 %Cropping of nanoindentation data if need be:
-cropytop=0;
+cropytop=23;
 cropybot=0;
 cropxright=0; 
 cropxleft=0;
