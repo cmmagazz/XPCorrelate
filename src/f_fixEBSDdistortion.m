@@ -222,6 +222,7 @@ end
 %% select points on the manipulated ebsd
 % IF THIS IS THE WRONG WAY, just close the figure
 try
+    disp('If the axes are the wrong way, close figure to select the right ones')
     ebsdfig=figure;
     if EBSDREFq==0 
         hplot=contourf(x_ebsd,y_ebsd,Phi,45,'LineColor','None');
